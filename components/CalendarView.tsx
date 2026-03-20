@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import LeaveModal from "@/components/LeaveModal"
 import ScrollTopButton from "@/components/ScrollTopButton"
+import { supabase } from "@/lib/supabase"
 
 type Leave = {
   id: string
@@ -41,10 +42,27 @@ export default function CalendarView() {
   // ★案件フィルター
   const [projectFilter, setProjectFilter] = useState("all")
 
-  useEffect(() => {
-    const data = localStorage.getItem("leaves")
-    if (data) setLeaves(JSON.parse(data))
-  }, [])
+useEffect(() => {
+
+  const fetchData = async () => {
+
+    const { data, error } = await supabase
+      .from("leaves")
+      .select("*")
+
+    if(error){
+      console.error(error)
+      return
+    }
+
+    if(data){
+      setLeaves(data)
+    }
+  }
+
+  fetchData()
+
+}, [])
 
   const monthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1)
   const monthEnd = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0)
@@ -82,17 +100,45 @@ export default function CalendarView() {
     setCurrentMonth(d)
   }
 
-  const updateLeave = (updated: Leave) => {
-    const newLeaves = leaves.map(l => l.id === updated.id ? updated : l)
-    setLeaves(newLeaves)
-    localStorage.setItem("leaves", JSON.stringify(newLeaves))
+const updateLeave = async (updated: Leave) => {
+
+  const { error } = await supabase
+    .from("leaves")
+    .update({
+      name: updated.name,
+      project: updated.project,
+      start: updated.start,
+      end: updated.end,
+      reason: updated.reason
+    })
+    .eq("id", updated.id)
+
+  if(error){
+    console.error("更新エラー", error)
+    return
   }
 
-  const deleteLeave = (id: string) => {
-    const newLeaves = leaves.filter(l => l.id !== id)
-    setLeaves(newLeaves)
-    localStorage.setItem("leaves", JSON.stringify(newLeaves))
+  //  画面も更新
+  setLeaves(prev => prev.map(l => l.id ===updated.id ? updated : l))
+}
+
+const deleteLeave = async (id: string) => {
+
+  const { error } = await supabase
+    .from("leaves")
+    .delete()
+    .eq("id", id)
+
+  if(error){
+    console.error("削除エラー", error)
+    return
   }
+
+  // ★ 画面からも消す
+  setLeaves(prev => prev.filter(l => l.id !==id))
+
+  setSelectedLeave(null)
+}
 
   return (
     <main className="min-h-screen bg-gray-100 p-6">
@@ -249,12 +295,12 @@ export default function CalendarView() {
         )}
 
         {selectedLeave && (
-          <LeaveModal
-            leave={selectedLeave}
-            onClose={() => setSelectedLeave(null)}
-            onUpdate={updateLeave}
-            onDelete={deleteLeave}
-          />
+<LeaveModal
+  leave={selectedLeave}
+  onClose={() => setSelectedLeave(null)}
+  onUpdate={updateLeave}
+  onDelete={deleteLeave}
+/>
         )}
 
       </div>

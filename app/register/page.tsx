@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { getProjects } from "@/lib/projects"
+import { supabase } from "@/lib/supabase"
 
 export default function RegisterPage() {
 
@@ -27,26 +28,32 @@ export default function RegisterPage() {
 
   },[])
 
-const handleSubmit = () => {
+const handleSubmit = async () => {
 
-  const start = `${date}T${startTime}`
-  const end = `${date}T${endTime}`
-
-  const newLeave = {
-    id: Date.now().toString(),
-    name,
-    project,
-    start,
-    end,
-    reason
+  if(!name || !date || !startTime || !endTime){
+    alert("入力してください")
+    return
   }
 
-  const data = localStorage.getItem("leaves")
-  const leaves = data ? JSON.parse(data) : []
+const { error } = await supabase
+  .from("leaves")
+  .insert([
+    {
+      name,
+      project,
+      start: `${date}T${startTime}`,
+      end: `${date}T${endTime}`,
+      reason
+    }
+  ])
 
-  leaves.push(newLeave)
+if(error){
+  console.error("エラー内容👇", error)
+  alert("保存失敗")
+  return
+}
 
-  localStorage.setItem("leaves", JSON.stringify(leaves))
+  router.push("/")
 }
 
   return (
