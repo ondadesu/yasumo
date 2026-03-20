@@ -34,49 +34,44 @@ const formatTime = (date: string) =>
   new Date(date).toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" })
 
 export default function CalendarView() {
-
   const [leaves, setLeaves] = useState<Leave[]>([])
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [selectedLeave, setSelectedLeave] = useState<Leave | null>(null)
 
-  // ★案件フィルター
   const [projectFilter, setProjectFilter] = useState("all")
 
-useEffect(() => {
+  useEffect(() => {
+    const fetchData = async () => {
+      const { data, error } = await supabase.from("leaves").select("*")
 
-  const fetchData = async () => {
+      if (error) {
+        console.error(error)
+        return
+      }
 
-    const { data, error } = await supabase
-      .from("leaves")
-      .select("*")
-
-    if(error){
-      console.error(error)
-      return
+      if (data) {
+        setLeaves(data)
+      }
     }
 
-    if(data){
-      setLeaves(data)
-    }
-  }
-
-  fetchData()
-
-}, [])
+    fetchData()
+  }, [])
 
   const monthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1)
   const monthEnd = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0)
+  monthEnd.setHours(23, 59, 59, 999)
 
-  const monthLeaves = leaves.filter(l => {
-    const start = new Date(l.start)
+  const monthLeaves = leaves
+    .filter(l => {
+      const start = new Date(l.start)
 
-    return (
-      start >= monthStart &&
-      start <= monthEnd &&
-      (projectFilter === "all" || l.project === projectFilter)
-    )
-
-  }).sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
+      return (
+        start >= monthStart &&
+        start <= monthEnd &&
+        (projectFilter === "all" || l.project === projectFilter)
+      )
+    })
+    .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
 
   const weekGroups: Record<string, Leave[]> = {}
 
@@ -100,57 +95,46 @@ useEffect(() => {
     setCurrentMonth(d)
   }
 
-const updateLeave = async (updated: Leave) => {
+  const updateLeave = async (updated: Leave) => {
+    const { error } = await supabase
+      .from("leaves")
+      .update({
+        name: updated.name,
+        project: updated.project,
+        start: updated.start,
+        end: updated.end,
+        reason: updated.reason
+      })
+      .eq("id", updated.id)
 
-  const { error } = await supabase
-    .from("leaves")
-    .update({
-      name: updated.name,
-      project: updated.project,
-      start: updated.start,
-      end: updated.end,
-      reason: updated.reason
-    })
-    .eq("id", updated.id)
+    if (error) {
+      console.error("更新エラー", error)
+      return
+    }
 
-  if(error){
-    console.error("更新エラー", error)
-    return
+    setLeaves(prev => prev.map(l => (l.id === updated.id ? updated : l)))
   }
 
-  //  画面も更新
-  setLeaves(prev => prev.map(l => l.id ===updated.id ? updated : l))
-}
+  const deleteLeave = async (id: string) => {
+    const { error } = await supabase.from("leaves").delete().eq("id", id)
 
-const deleteLeave = async (id: string) => {
+    if (error) {
+      console.error("削除エラー", error)
+      return
+    }
 
-  const { error } = await supabase
-    .from("leaves")
-    .delete()
-    .eq("id", id)
-
-  if(error){
-    console.error("削除エラー", error)
-    return
+    setLeaves(prev => prev.filter(l => l.id !== id))
+    setSelectedLeave(null)
   }
-
-  // ★ 画面からも消す
-  setLeaves(prev => prev.filter(l => l.id !==id))
-
-  setSelectedLeave(null)
-}
 
   return (
     <main className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-6xl mx-auto space-y-6">
-
         {/* ヘッダー */}
         <div className="flex justify-between items-center">
-
           <h1 className="text-3xl font-bold">有給管理</h1>
 
           <div className="flex gap-3">
-
             <Link href="/project">
               <button
                 className="px-5 py-2 rounded text-white hover:scale-105 transition"
@@ -168,9 +152,7 @@ const deleteLeave = async (id: string) => {
                 ＋ 有給登録
               </button>
             </Link>
-
           </div>
-
         </div>
 
         {/* 月切替 */}
@@ -184,8 +166,10 @@ const deleteLeave = async (id: string) => {
 
           <input
             type="month"
-            value={`${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}`}
-            onChange={(e) => {
+            value={`${currentMonth.getFullYear()}-${String(
+              currentMonth.getMonth() + 1
+            ).padStart(2, "0")}`}
+            onChange={e => {
               const [y, m] = e.target.value.split("-").map(Number)
               setCurrentMonth(new Date(y, m - 1, 1))
             }}
@@ -204,7 +188,7 @@ const deleteLeave = async (id: string) => {
         <div className="flex justify-center">
           <select
             value={projectFilter}
-            onChange={(e) => setProjectFilter(e.target.value)}
+            onChange={e => setProjectFilter(e.target.value)}
             className="border p-2 rounded"
           >
             <option value="all">すべての案件</option>
@@ -219,8 +203,7 @@ const deleteLeave = async (id: string) => {
             登録データがありません
           </div>
         ) : (
-          weeks.map((week) => {
-
+          weeks.map(week => {
             const weekStart = new Date(week)
             const members = [...new Set(weekGroups[week].map(l => l.name))]
 
@@ -234,39 +217,35 @@ const deleteLeave = async (id: string) => {
 
             return (
               <div key={week} className="bg-white rounded-xl shadow p-6 space-y-4">
-
                 <p className="text-sm text-gray-600">
                   今週休む人: {members.join(" / ")} ({members.length}人)
                 </p>
 
                 <div className="grid grid-cols-2 md:grid-cols-7 gap-3">
-
                   {weekdays.map((w, i) => {
-
                     const dayDate = new Date(weekStart)
-                    dayDate.setDate(dayDate.getDate() + i)
+                    // ★ ここだけ +1 日補正
+                    dayDate.setDate(dayDate.getDate() + i + 1)
 
                     return (
-
                       <div key={i} className="bg-gray-50 rounded-lg p-3 min-h-[120px]">
-
                         <div className="font-semibold text-sm mb-2">
-                          {String(dayDate.getMonth() + 1).padStart(2, '0')}/
-                          {String(dayDate.getDate()).padStart(2, '0')}（{w}）
+                          {String(dayDate.getMonth() + 1).padStart(2, "0")}/
+                          {String(dayDate.getDate()).padStart(2, "0")}（{w}）
                         </div>
 
                         <div className="space-y-2">
-
                           {dayMap[i]?.map(l => (
                             <div
                               key={l.id}
                               className="bg-white p-2 rounded shadow text-xs cursor-pointer hover:bg-gray-100"
                               onClick={() => setSelectedLeave(l)}
                             >
-
                               <div className="font-semibold">{l.name}</div>
 
-                              <div>{formatTime(l.start)}〜{formatTime(l.end)}</div>
+                              <div>
+                                {formatTime(l.start)}〜{formatTime(l.end)}
+                              </div>
 
                               <div
                                 style={{ color: projectsColor[l.project] }}
@@ -278,16 +257,12 @@ const deleteLeave = async (id: string) => {
                               <div className="text-gray-400 text-[10px]">
                                 {l.reason}
                               </div>
-
                             </div>
                           ))}
-
                         </div>
-
                       </div>
                     )
                   })}
-
                 </div>
               </div>
             )
@@ -295,18 +270,16 @@ const deleteLeave = async (id: string) => {
         )}
 
         {selectedLeave && (
-<LeaveModal
-  leave={selectedLeave}
-  onClose={() => setSelectedLeave(null)}
-  onUpdate={updateLeave}
-  onDelete={deleteLeave}
-/>
+          <LeaveModal
+            leave={selectedLeave}
+            onClose={() => setSelectedLeave(null)}
+            onUpdate={updateLeave}
+            onDelete={deleteLeave}
+          />
         )}
-
       </div>
 
       <ScrollTopButton />
-
     </main>
   )
 }
