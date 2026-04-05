@@ -60,7 +60,7 @@ if(error){
 
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
 
-      <div className="bg-white p-8 rounded-lg shadow w-96">
+      <div className="bg-white p-8 rounded-lg shadow w-96 shadow-[0_2px_8px_rgba(0,0,0,0.12)]">
 
         <h1 className="text-xl font-bold mb-6 text-center">
           有給登録
@@ -108,7 +108,7 @@ if(error){
           />
 
           <select
-          className="border p-2 rounded"
+          className="border p-2 rounded cursor-pointer"
           value={project}
           onChange={(e)=>setProject(e.target.value)}
           >
@@ -120,7 +120,7 @@ if(error){
           </select>
 
           <button
-          className="text-white p-2 rounded"
+          className="text-white font-bold hover::bg-lime-400 p-2 rounded cursor-pointer"
           style={{background:"#c3d60b"}}
           onClick={handleSubmit}
           >
@@ -128,7 +128,8 @@ if(error){
           </button>
 
           <button
-          className="bg-gray-300 hover:bg-gray-400 p-2 rounded"
+          className="text-white bg-black-300 font-bold hover:bg-gray-400 p-2 rounded cursor-pointer"
+          style={{background:"#000000"}}
           onClick={()=>router.push("/")}
           >
           一覧へ戻る

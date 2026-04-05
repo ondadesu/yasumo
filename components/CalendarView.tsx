@@ -128,17 +128,50 @@ export default function CalendarView() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-6xl mx-auto space-y-6">
-        {/* ヘッダー */}
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">有給管理</h1>
+    <main
+      className="bg-gray-100 min-h-screen p-6"
+    >
+      {/* アニメーションCSS */}
+      <style>{`
+        .fade-right {
+          opacity: 0;
+          transform: translateX(100px);
+          animation: fadeInRight 1s ease-out forwards;
+        }
+        .fade-left {
+          opacity: 0;
+          transform: translateX(-100px);
+          animation: fadeInLeft 1s ease-out forwards;
+        }
+        @keyframes fadeInRight {
+          to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes fadeInLeft {
+          to { opacity: 1; transform: translateX(0); }
+        }
+      `}</style>
 
-          <div className="flex gap-3">
+      <div className="max-w-6xl mx-auto space-y-6">
+
+        {/* ヘッダー */}
+        {/* ヘッダー */}
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 pb-4 border-b border-gray-200">
+          <div className="fade-left">
+            <h1 className="text-4xl font-bold text-black text-center md:text-left">
+              YASUMO
+            </h1>
+            <p className="text-xs text-gray-500 text-center mt-1">
+              ～チームの有給状況を、ひと目でスマートに把握～
+            </p>
+          </div>
+
+
+          <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto fade-right">
+
             <Link href="/project">
               <button
-                className="px-5 py-2 rounded text-white hover:scale-105 transition"
-                style={{ background: "#60c3d6" }}
+                className="w-full md:w-auto px-5 py-2 rounded-md text-white text-sm font-semibold shadow-[0_2px_8px_rgba(0,0,0,0.12)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.12)] transition hover:scale-110 cursor-pointer"
+                style={{ background: "#000000" }}
               >
                 ＋ 案件追加
               </button>
@@ -146,19 +179,22 @@ export default function CalendarView() {
 
             <Link href="/register">
               <button
-                className="px-5 py-2 rounded text-white hover:scale-105 transition"
+                className="w-full md:w-auto px-5 py-2 rounded-md text-white text-sm font-semibold shadow-[0_2px_8px_rgba(0,0,0,0.12)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.12)] transition hover:scale-110 cursor-pointer"
                 style={{ background: "#c3d60b" }}
               >
                 ＋ 有給登録
               </button>
             </Link>
+
           </div>
         </div>
 
+
+
         {/* 月切替 */}
-        <div className="flex justify-center items-center space-x-4">
+        <div className="flex justify-center items-center space-x-4 fade-right">
           <button
-            className="px-4 py-1 rounded bg-gray-300 hover:bg-gray-400 transition"
+            className="px-4 py-1 rounded-full bg-white border border-gray-300 text-sm text-gray-700 shadow-sm hover:bg-gray-100 transition cursor-pointer"
             onClick={prevMonth}
           >
             前月
@@ -173,23 +209,23 @@ export default function CalendarView() {
               const [y, m] = e.target.value.split("-").map(Number)
               setCurrentMonth(new Date(y, m - 1, 1))
             }}
-            className="border p-1 rounded text-center"
+            className="border p-1 rounded text-center shadow-sm cursor-pointer"
           />
 
           <button
-            className="px-4 py-1 rounded bg-gray-300 hover:bg-gray-400 transition"
+            className="px-4 py-1 rounded-full bg-white border border-gray-300 text-sm text-gray-700 shadow-sm hover:bg-gray-100 transition cursor-pointer"
             onClick={nextMonth}
           >
             次月
           </button>
         </div>
 
-        {/* ★案件フィルター */}
-        <div className="flex justify-center">
+        {/* 案件フィルター */}
+        <div className="flex justify-center fade-left">
           <select
             value={projectFilter}
             onChange={e => setProjectFilter(e.target.value)}
-            className="border p-2 rounded"
+            className="border p-2 rounded-full shadow-sm cursor-pointer"
           >
             <option value="all">すべての案件</option>
             {Object.keys(projectsColor).map(project => (
@@ -198,12 +234,13 @@ export default function CalendarView() {
           </select>
         </div>
 
+        {/* カレンダー */}
         {weeks.length === 0 ? (
-          <div className="bg-white rounded-xl shadow p-6 text-center text-gray-500">
+          <div className="bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.12)] p-6 text-center text-gray-500 border border-gray-200">
             登録データがありません
           </div>
         ) : (
-          weeks.map(week => {
+          weeks.map((week, index) => {
             const weekStart = new Date(week)
             const members = [...new Set(weekGroups[week].map(l => l.name))]
 
@@ -215,21 +252,35 @@ export default function CalendarView() {
               dayMap[d].push(l)
             })
 
+            // ★ 週ごとに左右交互アニメーション
+            const animationClass = index % 2 === 0 ? "fade-right" : "fade-left"
+
             return (
-              <div key={week} className="bg-white rounded-xl shadow p-6 space-y-4">
+              <div
+                key={week}
+                className={`bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.12)] p-6 space-y-4 border border-gray-200 ${animationClass}`}
+              >
                 <p className="text-sm text-gray-600">
-                  今週休む人: {members.join(" / ")} ({members.length}人)
+                  今週休む人:{" "}
+                  <span className="font-semibold text-black">
+                    {members.length > 0 ? members.join(" / ") : "なし"}
+                  </span>{" "}
+                  <span className="text-xs text-gray-400">
+                    ({members.length}人)
+                  </span>
                 </p>
 
                 <div className="grid grid-cols-2 md:grid-cols-7 gap-3">
                   {weekdays.map((w, i) => {
                     const dayDate = new Date(weekStart)
-                    // ★ ここだけ +1 日補正
                     dayDate.setDate(dayDate.getDate() + i + 1)
 
                     return (
-                      <div key={i} className="bg-gray-50 rounded-lg p-3 min-h-[120px]">
-                        <div className="font-semibold text-sm mb-2">
+                      <div
+                        key={i}
+                        className="bg-white rounded-lg p-3 min-h-[120px] shadow-[0_2px_8px_rgba(0,0,0,0.12)] border border-gray-200"
+                      >
+                        <div className="font-semibold text-sm mb-2 text-gray-800">
                           {String(dayDate.getMonth() + 1).padStart(2, "0")}/
                           {String(dayDate.getDate()).padStart(2, "0")}（{w}）
                         </div>
@@ -238,7 +289,7 @@ export default function CalendarView() {
                           {dayMap[i]?.map(l => (
                             <div
                               key={l.id}
-                              className="bg-white p-2 rounded shadow text-xs cursor-pointer hover:bg-gray-100"
+                              className="bg-white p-2 rounded-lg shadow-sm border border-gray-100 text-xs cursor-pointer hover:bg-gray-100 transition"
                               onClick={() => setSelectedLeave(l)}
                             >
                               <div className="font-semibold">{l.name}</div>
