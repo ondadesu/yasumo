@@ -15,12 +15,6 @@ type Leave = {
   reason: string
 }
 
-const projectsColor: Record<string, string> = {
-  "A案件": "#c3d60b",
-  "B案件": "#60c3d6",
-  "C案件": "#d660c3"
-}
-
 const weekdays = ["日", "月", "火", "水", "木", "金", "土"]
 
 const getWeekStart = (date: Date) => {
@@ -31,30 +25,38 @@ const getWeekStart = (date: Date) => {
 }
 
 const formatTime = (date: string) =>
-  new Date(date).toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" })
+  new Date(date).toLocaleTimeString("ja-JP", {
+    hour: "2-digit",
+    minute: "2-digit"
+  })
 
 export default function CalendarView() {
   const [leaves, setLeaves] = useState<Leave[]>([])
+  const [projects, setProjects] = useState<{ id: string; name: string }[]>([])
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [selectedLeave, setSelectedLeave] = useState<Leave | null>(null)
-
   const [projectFilter, setProjectFilter] = useState("all")
 
+  // 有給データ取得
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchLeaves = async () => {
       const { data, error } = await supabase.from("leaves").select("*")
-
-      if (error) {
-        console.error(error)
-        return
-      }
-
-      if (data) {
-        setLeaves(data)
-      }
+      if (!error && data) setLeaves(data)
     }
+    fetchLeaves()
+  }, [])
 
-    fetchData()
+  // 案件一覧取得（色なし）
+  useEffect(() => {
+    const fetchProjects = async () => {
+      const { data, error } = await supabase
+        .from("projects")
+        .select("id, name")
+        .order("created_at")
+
+      if (!error && data) setProjects(data)
+    }
+    fetchProjects()
   }, [])
 
   const monthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1)
@@ -64,7 +66,6 @@ export default function CalendarView() {
   const monthLeaves = leaves
     .filter(l => {
       const start = new Date(l.start)
-
       return (
         start >= monthStart &&
         start <= monthEnd &&
@@ -117,7 +118,6 @@ export default function CalendarView() {
 
   const deleteLeave = async (id: string) => {
     const { error } = await supabase.from("leaves").delete().eq("id", id)
-
     if (error) {
       console.error("削除エラー", error)
       return
@@ -128,9 +128,8 @@ export default function CalendarView() {
   }
 
   return (
-    <main
-      className="bg-gray-100 min-h-screen p-6"
-    >
+    <main className="bg-gray-100 min-h-screen p-6">
+
       {/* アニメーションCSS */}
       <style>{`
         .fade-right {
@@ -154,7 +153,6 @@ export default function CalendarView() {
       <div className="max-w-6xl mx-auto space-y-6">
 
         {/* ヘッダー */}
-        {/* ヘッダー */}
         <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 pb-4 border-b border-gray-200">
           <div className="fade-left">
             <h1 className="text-4xl font-bold text-black text-center md:text-left">
@@ -165,12 +163,10 @@ export default function CalendarView() {
             </p>
           </div>
 
-
           <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto fade-right">
-
             <Link href="/project">
               <button
-                className="w-full md:w-auto px-5 py-2 rounded-md text-white text-sm font-semibold shadow-[0_2px_8px_rgba(0,0,0,0.12)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.12)] transition hover:scale-110 cursor-pointer"
+                className="w-full md:w-auto px-5 py-2 rounded-md text-white text-sm font-semibold shadow hover:scale-110 transition cursor-pointer"
                 style={{ background: "#000000" }}
               >
                 ＋ 案件追加
@@ -179,17 +175,14 @@ export default function CalendarView() {
 
             <Link href="/register">
               <button
-                className="w-full md:w-auto px-5 py-2 rounded-md text-white text-sm font-semibold shadow-[0_2px_8px_rgba(0,0,0,0.12)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.12)] transition hover:scale-110 cursor-pointer"
+                className="w-full md:w-auto px-5 py-2 rounded-md text-white text-sm font-semibold shadow hover:scale-110 transition cursor-pointer"
                 style={{ background: "#c3d60b" }}
               >
                 ＋ 有給登録
               </button>
             </Link>
-
           </div>
         </div>
-
-
 
         {/* 月切替 */}
         <div className="flex justify-center items-center space-x-4 fade-right">
@@ -228,15 +221,17 @@ export default function CalendarView() {
             className="border p-2 rounded-full shadow-sm cursor-pointer"
           >
             <option value="all">すべての案件</option>
-            {Object.keys(projectsColor).map(project => (
-              <option key={project}>{project}</option>
+            {projects.map(p => (
+              <option key={p.id} value={p.name}>
+                {p.name}
+              </option>
             ))}
           </select>
         </div>
 
         {/* カレンダー */}
         {weeks.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.12)] p-6 text-center text-gray-500 border border-gray-200">
+          <div className="bg-white rounded-xl shadow p-6 text-center text-gray-500 border border-gray-200">
             登録データがありません
           </div>
         ) : (
@@ -252,13 +247,12 @@ export default function CalendarView() {
               dayMap[d].push(l)
             })
 
-            // ★ 週ごとに左右交互アニメーション
             const animationClass = index % 2 === 0 ? "fade-right" : "fade-left"
 
             return (
               <div
                 key={week}
-                className={`bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.12)] p-6 space-y-4 border border-gray-200 ${animationClass}`}
+                className={`bg-white rounded-xl shadow p-6 space-y-4 border border-gray-200 ${animationClass}`}
               >
                 <p className="text-sm text-gray-600">
                   今週休む人:{" "}
@@ -278,7 +272,7 @@ export default function CalendarView() {
                     return (
                       <div
                         key={i}
-                        className="bg-white rounded-lg p-3 min-h-[120px] shadow-[0_2px_8px_rgba(0,0,0,0.12)] border border-gray-200"
+                        className="bg-white rounded-lg p-3 min-h-[120px] shadow border border-gray-200"
                       >
                         <div className="font-semibold text-sm mb-2 text-gray-800">
                           {String(dayDate.getMonth() + 1).padStart(2, "0")}/
@@ -295,13 +289,11 @@ export default function CalendarView() {
                               <div className="font-semibold">{l.name}</div>
 
                               <div>
-                                {formatTime(l.start)}〜{formatTime(l.end)}
+                                {formatTime(l.start)}〜{formatTime(l.end)} 不在
                               </div>
 
-                              <div
-                                style={{ color: projectsColor[l.project] }}
-                                className="font-semibold"
-                              >
+                              {/* ★ 色なし版：黒文字で統一 */}
+                              <div className="font-semibold text-black">
                                 {l.project}
                               </div>
 

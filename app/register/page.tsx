@@ -1,12 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { getProjects } from "@/lib/projects"
 import { supabase } from "@/lib/supabase"
 
 export default function RegisterPage() {
-
   const router = useRouter()
 
   const [name, setName] = useState("")
@@ -15,34 +13,43 @@ export default function RegisterPage() {
   const [endTime, setEndTime] = useState("")
   const [reason, setReason] = useState("")
 
-  // ★ useEffect を使わず lazy initializer で初期化
-  const [projects] = useState<string[]>(() => getProjects())
+  const [projects, setProjects] = useState<{ id: string; name: string }[]>([])
+  const [project, setProject] = useState("")
 
-  const [project, setProject] = useState<string>(() => {
-    const list = getProjects()
-    return list.length > 0 ? list[0] : ""
-  })
+  // ★ 確認モーダル表示フラグ
+  const [showConfirm, setShowConfirm] = useState(false)
 
-  const handleSubmit = async () => {
+  // 案件一覧を Supabase から取得
+  useEffect(() => {
+    const load = async () => {
+      const { data } = await supabase
+        .from("projects")
+        .select("*")
+        .order("created_at", { ascending: true })
+
+      if (data) {
+        setProjects(data)
+        if (data.length > 0) setProject(data[0].name)
+      }
+    }
+    load()
+  }, [])
+
+  // ★ 実際の登録処理
+  const submitLeave = async () => {
     if (!name || !date || !startTime || !endTime) {
       alert("入力してください")
       return
     }
 
+    const start = `${date}T${startTime}:00`
+    const end = `${date}T${endTime}:00`
+
     const { error } = await supabase
       .from("leaves")
-      .insert([
-        {
-          name,
-          project,
-          start: `${date}T${startTime}`,
-          end: `${date}T${endTime}`,
-          reason
-        }
-      ])
+      .insert([{ name, project, start, end, reason }])
 
     if (error) {
-      console.error("エラー内容👇", error)
       alert("保存失敗")
       return
     }
@@ -53,6 +60,45 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
 
+      {/* ★ 確認モーダル */}
+      {showConfirm && (
+        <div
+          className="fixed inset-0 bg-black/40 flex items-center justify-center"
+          onClick={() => setShowConfirm(false)}
+        >
+          <div
+            className="bg-white p-6 rounded-xl w-80 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-lg font-bold text-center">登録確認</h2>
+            <p className="text-sm text-gray-700 text-center">
+              この内容で登録しますか？
+            </p>
+
+            <div className="flex gap-3">
+              <button
+                className="flex-1 py-2 rounded text-white"
+                style={{ background: "#c3d60b" }}
+                onClick={() => {
+                  setShowConfirm(false)
+                  submitLeave()
+                }}
+              >
+                はい
+              </button>
+
+              <button
+                className="flex-1 py-2 rounded bg-gray-300"
+                onClick={() => setShowConfirm(false)}
+              >
+                いいえ
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 本体 */}
       <div className="bg-white p-8 rounded-lg shadow w-96 shadow-[0_2px_8px_rgba(0,0,0,0.12)]">
 
         <h1 className="text-xl font-bold mb-6 text-center">
@@ -104,16 +150,17 @@ export default function RegisterPage() {
             onChange={(e) => setProject(e.target.value)}
           >
             {projects.map((p) => (
-              <option key={p} value={p}>
-                {p}
+              <option key={p.id} value={p.name}>
+                {p.name}
               </option>
             ))}
           </select>
 
+          {/* ★ 登録ボタン → 確認モーダル表示 */}
           <button
             className="text-white font-bold p-2 rounded cursor-pointer hover:bg-lime-500 transition"
             style={{ background: "#c3d60b" }}
-            onClick={handleSubmit}
+            onClick={() => setShowConfirm(true)}
           >
             登録
           </button>
