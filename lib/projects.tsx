@@ -1,21 +1,43 @@
-export const getProjects = () => {
+// プロジェクトは string のみで管理
+export type Project = string
+
+// 有給データの型
+export type Leave = {
+  id: string
+  name: string
+  project: string
+  start: string
+  end: string
+  reason: string
+}
+
+// -----------------------------
+// プロジェクト一覧取得
+// -----------------------------
+export const getProjects = (): Project[] => {
   if (typeof window === "undefined") return []
 
   const data = localStorage.getItem("projects")
 
   if (!data) {
-    const defaultProjects = ["A案件","B案件","C案件"]
+    const defaultProjects: Project[] = ["A案件", "B案件", "C案件"]
     localStorage.setItem("projects", JSON.stringify(defaultProjects))
     return defaultProjects
   }
 
-  return JSON.parse(data)
+  try {
+    const parsed = JSON.parse(data) as Project[]
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
+  }
 }
 
-export const addProject = (name: string) => {
-
+// -----------------------------
+// プロジェクト追加
+// -----------------------------
+export const addProject = (name: string): Project[] => {
   const projects = getProjects()
-
   const newProjects = [...projects, name]
 
   localStorage.setItem("projects", JSON.stringify(newProjects))
@@ -23,16 +45,20 @@ export const addProject = (name: string) => {
   return newProjects
 }
 
-export const deleteProject = (name: string) => {
+// -----------------------------
+// プロジェクト削除
+// -----------------------------
+export type DeleteProjectResult =
+  | { success: false; message: string }
+  | { success: true; projects: string[] }
 
+export const deleteProject = (name: string): DeleteProjectResult => {
   const projects = getProjects()
 
-  // 有給データ取得
   const leavesData = localStorage.getItem("leaves")
-  const leaves = leavesData ? JSON.parse(leavesData) : []
+  const leaves: Leave[] = leavesData ? JSON.parse(leavesData) : []
 
-  // その案件が使われているか確認
-  const isUsed = leaves.some((l: any) => l.project === name)
+  const isUsed = leaves.some((l) => l.project === name)
 
   if (isUsed) {
     return {
@@ -41,7 +67,7 @@ export const deleteProject = (name: string) => {
     }
   }
 
-  const newProjects = projects.filter((p: string) => p !== name)
+  const newProjects = projects.filter((p) => p !== name)
 
   localStorage.setItem("projects", JSON.stringify(newProjects))
 
