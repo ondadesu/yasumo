@@ -16,10 +16,9 @@ export default function RegisterPage() {
   const [projects, setProjects] = useState<{ id: string; name: string }[]>([])
   const [project, setProject] = useState("")
 
-  // ★ 確認モーダル表示フラグ
   const [showConfirm, setShowConfirm] = useState(false)
 
-  // 案件一覧を Supabase から取得
+  // 案件一覧取得
   useEffect(() => {
     const load = async () => {
       const { data } = await supabase
@@ -35,7 +34,7 @@ export default function RegisterPage() {
     load()
   }, [])
 
-  // ★ 実際の登録処理
+  // 実際の登録処理
   const submitLeave = async () => {
     if (!name || !date || !startTime || !endTime) {
       alert("入力してください")
@@ -60,6 +59,21 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
 
+      {/* ★ アニメーションCSS */}
+      <style>{`
+        .fade-in {
+          opacity: 0;
+          transform: translateY(20px);
+          animation: fadeIn 0.6s ease-out forwards;
+        }
+        @keyframes fadeIn {
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
+
       {/* ★ 確認モーダル */}
       {showConfirm && (
         <div
@@ -77,8 +91,7 @@ export default function RegisterPage() {
 
             <div className="flex gap-3">
               <button
-                className="flex-1 py-2 rounded text-white"
-                style={{ background: "#c3d60b" }}
+                className="flex-1 py-2 rounded text-white cursor-pointer bg-[#c3d60b] hover:bg-[#a8c00a] transition"
                 onClick={() => {
                   setShowConfirm(false)
                   submitLeave()
@@ -88,7 +101,7 @@ export default function RegisterPage() {
               </button>
 
               <button
-                className="flex-1 py-2 rounded bg-gray-300"
+                className="flex-1 py-2 rounded bg-gray-300 hover:bg-gray-400 cursor-pointer transition"
                 onClick={() => setShowConfirm(false)}
               >
                 いいえ
@@ -99,7 +112,7 @@ export default function RegisterPage() {
       )}
 
       {/* 本体 */}
-      <div className="bg-white p-8 rounded-lg shadow w-96 shadow-[0_2px_8px_rgba(0,0,0,0.12)]">
+      <div className="bg-white p-8 rounded-lg shadow w-96 shadow-[0_2px_8px_rgba(0,0,0,0.12)] fade-in">
 
         <h1 className="text-xl font-bold mb-6 text-center">
           有給登録
@@ -156,18 +169,17 @@ export default function RegisterPage() {
             ))}
           </select>
 
-          {/* ★ 登録ボタン → 確認モーダル表示 */}
+          {/* ★ 登録ボタン（初期色 #c3d60b → ホバーで濃く） */}
           <button
-            className="text-white font-bold p-2 rounded cursor-pointer hover:bg-lime-500 transition"
-            style={{ background: "#c3d60b" }}
+            className="text-white font-bold p-2 rounded cursor-pointer bg-[#c3d60b] hover:bg-[#a8c00a] transition"
             onClick={() => setShowConfirm(true)}
           >
             登録
           </button>
 
+          {/* ★ 一覧へ戻る（黒 → ホバーでグレー） */}
           <button
-            className="text-white font-bold p-2 rounded cursor-pointer hover:bg-gray-400 transition"
-            style={{ background: "#000000" }}
+            className="text-white font-bold p-2 rounded cursor-pointer bg-black hover:bg-gray-700 transition"
             onClick={() => router.push("/")}
           >
             一覧へ戻る

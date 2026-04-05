@@ -7,11 +7,8 @@ import { supabase } from "@/lib/supabase"
 export default function ProjectPage() {
   const [name, setName] = useState("")
   const [projects, setProjects] = useState<{ id: string; name: string }[]>([])
-
-  // ★ 確認モーダル表示フラグ
   const [showConfirm, setShowConfirm] = useState(false)
 
-  // 初回ロードで Supabase から取得
   useEffect(() => {
     const load = async () => {
       const { data, error } = await supabase
@@ -24,7 +21,6 @@ export default function ProjectPage() {
     load()
   }, [])
 
-  // ★ 実際の追加処理
   const submitProject = async () => {
     if (!name.trim()) {
       alert("案件名を入力してください")
@@ -45,7 +41,6 @@ export default function ProjectPage() {
     setName("")
   }
 
-  // 削除
   const handleDelete = async (id: string, name: string) => {
     const { data: usedLeaves, error: checkError } = await supabase
       .from("leaves")
@@ -81,6 +76,26 @@ export default function ProjectPage() {
   return (
     <main className="min-h-screen bg-gray-100 p-6">
 
+      {/* ★ CalendarView と同じアニメーション */}
+      <style>{`
+        .fade-right {
+          opacity: 0;
+          transform: translateX(100px);
+          animation: fadeInRight 1s ease-out forwards;
+        }
+        .fade-left {
+          opacity: 0;
+          transform: translateX(-100px);
+          animation: fadeInLeft 1s ease-out forwards;
+        }
+        @keyframes fadeInRight {
+          to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes fadeInLeft {
+          to { opacity: 1; transform: translateX(0); }
+        }
+      `}</style>
+
       {/* ★ 確認モーダル */}
       {showConfirm && (
         <div
@@ -98,8 +113,7 @@ export default function ProjectPage() {
 
             <div className="flex gap-3">
               <button
-                className="flex-1 py-2 rounded text-white"
-                style={{ background: "#c3d60b" }}
+                className="flex-1 py-2 rounded text-white bg-lime-500 hover:bg-lime-600 transition cursor-pointer"
                 onClick={() => {
                   setShowConfirm(false)
                   submitProject()
@@ -109,7 +123,7 @@ export default function ProjectPage() {
               </button>
 
               <button
-                className="flex-1 py-2 rounded bg-gray-300"
+                className="flex-1 py-2 rounded bg-gray-300 hover:bg-gray-400 transition cursor-pointer"
                 onClick={() => setShowConfirm(false)}
               >
                 いいえ
@@ -121,18 +135,21 @@ export default function ProjectPage() {
 
       <div className="max-w-md mx-auto space-y-6">
 
-        <div className="flex justify-between items-center">
+        {/* ★ fade-right */}
+        <div className="flex justify-between items-center fade-right">
           <h1 className="text-2xl font-bold">案件管理</h1>
 
           <Link href="/">
-            <button className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400">
+            <button
+              className="px-4 py-2 rounded text-white bg-black hover:bg-gray-700 transition cursor-pointer"
+            >
               一覧へ戻る
             </button>
           </Link>
         </div>
 
-        {/* 案件追加 */}
-        <div className="bg-white p-6 rounded-xl shadow space-y-3">
+        {/* ★ fade-left */}
+        <div className="bg-white p-6 rounded-xl shadow space-y-3 fade-left">
           <h2 className="font-semibold">案件追加</h2>
 
           <input
@@ -143,18 +160,16 @@ export default function ProjectPage() {
             className="border p-2 w-full rounded"
           />
 
-          {/* ★ 追加ボタン → 確認モーダル表示 */}
           <button
             onClick={() => setShowConfirm(true)}
-            className="w-full py-2 text-white rounded hover:scale-105 transition"
-            style={{ background: "#c3d60b" }}
+            className="w-full py-2 text-white rounded transition cursor-pointer bg-[#c3d60b] hover:bg-[#a8c00a]"
           >
             追加
           </button>
         </div>
 
-        {/* 案件一覧 */}
-        <div className="bg-white p-6 rounded-xl shadow space-y-3">
+        {/* ★ fade-right */}
+        <div className="bg-white p-6 rounded-xl shadow space-y-3 fade-right">
           <h2 className="font-semibold">案件一覧</h2>
 
           {projects.length === 0 ? (
@@ -172,7 +187,7 @@ export default function ProjectPage() {
 
                   <button
                     onClick={() => handleDelete(p.id, p.name)}
-                    className="px-3 py-1 text-white rounded bg-red-500 hover:bg-red-600"
+                    className="px-3 py-1 text-white rounded bg-red-500 hover:bg-red-600 transition cursor-pointer"
                   >
                     削除
                   </button>
