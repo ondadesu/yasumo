@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { supabase } from "@/lib/supabase"
+import { TrashIcon } from "@heroicons/react/24/outline"
+import { ArrowUturnLeftIcon } from "@heroicons/react/24/outline"
 
 export default function ProjectPage() {
   const [name, setName] = useState("")
@@ -41,16 +43,11 @@ export default function ProjectPage() {
     setName("")
   }
 
-  const handleDelete = async (id: string, name: string) => {
-    const { data: usedLeaves, error: checkError } = await supabase
+  const handleDelete = async (id: string, projectName: string) => {
+    const { data: usedLeaves } = await supabase
       .from("leaves")
       .select("id")
-      .eq("project", name)
-
-    if (checkError) {
-      alert("確認中にエラーが発生しました")
-      return
-    }
+      .eq("project", projectName)
 
     if (usedLeaves && usedLeaves.length > 0) {
       alert("この案件は有給登録で使用されているため削除できません")
@@ -74,9 +71,8 @@ export default function ProjectPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-100 p-6">
-
-      {/* ★ CalendarView と同じアニメーション */}
+    <main className="min-h-screen bg-white md:bg-gray-100 p-6">
+      {/* アニメーションCSS */}
       <style>{`
         .fade-right {
           opacity: 0;
@@ -113,7 +109,12 @@ export default function ProjectPage() {
 
             <div className="flex gap-3">
               <button
-                className="flex-1 py-2 rounded text-white bg-lime-500 hover:bg-lime-600 transition cursor-pointer"
+                className="
+                  flex-1 py-2 rounded-full cursor-pointer font-medium
+                  bg-[#c3d60b] text-white border border-transparent
+                  hover:bg-white hover:text-[#c3d60b] hover:border-[#c3d60b]
+                  transition shadow-sm
+                "
                 onClick={() => {
                   setShowConfirm(false)
                   submitProject()
@@ -123,7 +124,12 @@ export default function ProjectPage() {
               </button>
 
               <button
-                className="flex-1 py-2 rounded bg-gray-300 hover:bg-gray-400 transition cursor-pointer"
+                className="
+                  flex-1 py-2 rounded-full cursor-pointer font-medium
+                  bg-white text-black border border-gray-300
+                  hover:bg-black hover:text-white hover:border-white
+                  transition shadow-sm
+                "
                 onClick={() => setShowConfirm(false)}
               >
                 いいえ
@@ -135,21 +141,27 @@ export default function ProjectPage() {
 
       <div className="max-w-md mx-auto space-y-6">
 
-        {/* ★ fade-right */}
+        {/* ヘッダー */}
         <div className="flex justify-between items-center fade-right">
           <h1 className="text-2xl font-bold">案件管理</h1>
 
           <Link href="/">
             <button
-              className="px-4 py-2 rounded text-white bg-black hover:bg-gray-700 transition cursor-pointer"
+              className="
+                rounded-full px-4 py-2 text-black bg-white
+                hover:bg-black hover:text-white hover:border-black
+                border
+                transition cursor-pointer flex items-center gap-2 shadow-sm
+              "
             >
-              一覧へ戻る
+              <ArrowUturnLeftIcon className="w-5 h-5" />
+              戻る
             </button>
           </Link>
         </div>
 
-        {/* ★ fade-left */}
-        <div className="bg-white p-6 rounded-xl shadow space-y-3 fade-left">
+        {/* 案件追加 */}
+        <div className="bg-white p-6 rounded-xl shadow-none md:shadow space-y-4 fade-left">
           <h2 className="font-semibold">案件追加</h2>
 
           <input
@@ -157,45 +169,60 @@ export default function ProjectPage() {
             placeholder="案件名"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="border p-2 w-full rounded"
+            className="
+              w-full p-2
+              border-b border-gray-400
+              focus:outline-none
+            "
           />
 
           <button
             onClick={() => setShowConfirm(true)}
-            className="w-full py-2 text-white rounded transition cursor-pointer bg-[#c3d60b] hover:bg-[#a8c00a]"
+            className="
+              rounded-full w-full py-2 font-medium cursor-pointer
+              bg-[#c3d60b] text-white border border-transparent
+              hover:bg-white hover:text-[#c3d60b] hover:border-[#c3d60b]
+              transition
+            "
           >
             追加
           </button>
         </div>
 
-        {/* ★ fade-right */}
-        <div className="bg-white p-6 rounded-xl shadow space-y-3 fade-right">
-          <h2 className="font-semibold">案件一覧</h2>
+        {/* 案件一覧 */}
+        <h2 className="font-semibold fade-right">案件一覧</h2>
 
-          {projects.length === 0 ? (
-            <p className="text-gray-500 text-sm">
-              案件が登録されていません
-            </p>
-          ) : (
-            <div className="space-y-2">
-              {projects.map((p) => (
-                <div
-                  key={p.id}
-                  className="flex justify-between items-center border rounded p-2"
+        {projects.length === 0 ? (
+          <p className="text-gray-500 text-sm">案件が登録されていません</p>
+        ) : (
+          <div className="space-y-3">
+            {projects.map((p) => (
+              <div
+                key={p.id}
+                className="
+            flex items-center justify-between
+            bg-white border border-gray-200
+            rounded-xl px-3 py-2
+            shadow-none md:shadow-sm
+             transition fade-left
+          "
+              >
+                <span className="text-base">{p.name}</span>
+
+                <button
+                  onClick={() => handleDelete(p.id, p.name)}
+                  className="
+              p-1 rounded-full border border-gray-400 bg-white text-gray-400
+              hover:bg-gray-400 hover:text-white 
+              transition cursor-pointer flex items-center justify-center
+            "
                 >
-                  <span>{p.name}</span>
-
-                  <button
-                    onClick={() => handleDelete(p.id, p.name)}
-                    className="px-3 py-1 text-white rounded bg-red-500 hover:bg-red-600 transition cursor-pointer"
-                  >
-                    削除
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+                  <TrashIcon className="w-5 h-5" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
 
       </div>
     </main>

@@ -5,6 +5,7 @@ import Link from "next/link"
 import LeaveModal from "@/components/LeaveModal"
 import ScrollTopButton from "@/components/ScrollTopButton"
 import { supabase } from "@/lib/supabase"
+import { UserIcon, ClockIcon, ChatBubbleLeftRightIcon, } from "@heroicons/react/24/outline"
 
 type Leave = {
   id: string
@@ -153,7 +154,7 @@ export default function CalendarView() {
       <div className="max-w-6xl mx-auto space-y-6">
 
         {/* ヘッダー */}
-        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 pb-4 border-b border-gray-200">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 pb-4 border-b border-gray-300">
           <div className="fade-left">
             <h1 className="text-4xl font-bold text-black text-center md:text-left">
               YASUMO
@@ -166,8 +167,14 @@ export default function CalendarView() {
           <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto fade-right">
             <Link href="/project">
               <button
-                className="w-full md:w-auto px-5 py-2 rounded-md text-white text-sm font-semibold shadow hover:scale-110 transition cursor-pointer"
-                style={{ background: "#000000" }}
+                className="
+                  rounded-full w-full md:w-auto px-5 py-2
+                  text-white text-sm font-semibold shadow
+                  bg-black
+                  border border-transparent
+                  hover:text-black hover:bg-white hover:border-black
+                  transition cursor-pointer
+                "
               >
                 ＋ 案件追加
               </button>
@@ -175,8 +182,14 @@ export default function CalendarView() {
 
             <Link href="/register">
               <button
-                className="w-full md:w-auto px-5 py-2 rounded-md text-white text-sm font-semibold shadow hover:scale-110 transition cursor-pointer"
-                style={{ background: "#c3d60b" }}
+                className="
+                  rounded-full w-full md:w-auto px-5 py-2
+                  text-white text-sm font-semibold shadow
+                  bg-[#c3d60b]
+                  border border-transparent
+                  hover:text-[#c3d60b] hover:bg-white hover:border-[#c3d60b]
+                  transition cursor-pointer
+                "
               >
                 ＋ 有給登録
               </button>
@@ -283,26 +296,39 @@ export default function CalendarView() {
                           {dayMap[i]?.map(l => (
                             <div
                               key={l.id}
-                              className="bg-white p-2 rounded-lg shadow-sm border border-gray-100 text-xs cursor-pointer hover:bg-gray-100 transition"
+                              className="bg-white p-3 rounded-xl shadow-sm border border-gray-100 text-xs cursor-pointer hover:bg-gray-100 transition space-y-1"
                               onClick={() => setSelectedLeave(l)}
                             >
-                              <div className="font-semibold">{l.name}</div>
 
-                              <div>
-                                {formatTime(l.start)}〜{formatTime(l.end)} 不在
+                              {/* プロジェクト名 */}
+                              <div className="text-black font-semibold mb-2">
+                                【{l.project}】
                               </div>
 
-                              {/* ★ 色なし版：黒文字で統一 */}
-                              <div className="font-semibold text-black">
-                                {l.project}
+                              {/* 名前 + アイコン */}
+                              <div className="flex items-center gap-1 text-gray-700">
+                                <UserIcon className="w-4 h-4 text-gray-500" />
+                                <span className="font-semibold">{l.name}</span>
                               </div>
 
-                              <div className="text-gray-400 text-[10px]">
-                                {l.reason}
+                              {/* 時間 + アイコン */}
+                              <div className="flex items-center gap-1 text-gray-700">
+                                <ClockIcon className="w-4 h-4 text-gray-500" />
+                                <span>
+                                  {formatTime(l.start)}〜{formatTime(l.end)}
+                                </span>
                               </div>
+
+                              {/* 理由 + アイコン */}
+                              <div className="flex items-start gap-1 text-gray-700 text-[10px]">
+                                <ChatBubbleLeftRightIcon className="w-4 h-4 text-gray-400 shrink-0" />
+                                <span className="leading-snug break-words">{l.reason}</span>
+                              </div>
+
                             </div>
                           ))}
                         </div>
+
                       </div>
                     )
                   })}

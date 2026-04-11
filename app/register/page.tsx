@@ -57,23 +57,21 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-
-      {/* ★ アニメーションCSS */}
+    <div className="min-h-screen flex items-center justify-center bg-white md:bg-gray-50">
       <style>{`
-        .fade-in {
-          opacity: 0;
-          transform: translateY(20px);
-          animation: fadeIn 0.6s ease-out forwards;
-        }
-        @keyframes fadeIn {
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
+  .fade-up {
+    opacity: 0;
+    transform: translateY(40px);
+    animation: fadeUp 0.8s ease-out forwards;
+  }
 
+  @keyframes fadeUp {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+`}</style>
       {/* ★ 確認モーダル */}
       {showConfirm && (
         <div
@@ -84,14 +82,19 @@ export default function RegisterPage() {
             className="bg-white p-6 rounded-xl w-80 space-y-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-lg font-bold text-center">登録確認</h2>
+            <h2 className="text-lg font-bold text-center">登録内容確認</h2>
             <p className="text-sm text-gray-700 text-center">
               この内容で登録しますか？
             </p>
 
             <div className="flex gap-3">
               <button
-                className="flex-1 py-2 rounded text-white cursor-pointer bg-[#c3d60b] hover:bg-[#a8c00a] transition"
+                className="
+    flex-1 py-2 rounded-full cursor-pointer font-medium
+    bg-[#c3d60b] text-white border border-transparent
+    hover:bg-white hover:text-[#c3d60b] hover:border-[#c3d60b]
+    transition shadow-sm
+  "
                 onClick={() => {
                   setShowConfirm(false)
                   submitLeave()
@@ -101,7 +104,12 @@ export default function RegisterPage() {
               </button>
 
               <button
-                className="flex-1 py-2 rounded bg-gray-300 hover:bg-gray-400 cursor-pointer transition"
+                className="
+    flex-1 py-2 rounded-full cursor-pointer font-medium
+    bg-white text-black border border-black
+    hover:bg-black hover:text-white hover:border-white
+    transition shadow-sm
+  "
                 onClick={() => setShowConfirm(false)}
               >
                 いいえ
@@ -112,16 +120,27 @@ export default function RegisterPage() {
       )}
 
       {/* 本体 */}
-      <div className="bg-white p-8 rounded-lg shadow w-96 shadow-[0_2px_8px_rgba(0,0,0,0.12)] fade-in">
+      <div
+        className="
+          bg-white p-8 rounded-xl w-96
+          shadow-none md:shadow-[0_2px_8px_rgba(0,0,0,0.12)]
+          fade-up
+        "
+      >
 
         <h1 className="text-xl font-bold mb-6 text-center">
           有給登録
         </h1>
 
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-6">
 
+          {/* ★ 下線のみの入力欄 */}
           <input
-            className="border p-2 rounded"
+            className="
+              border-b border-gray-400
+              focus:outline-none
+              p-2
+            "
             placeholder="名前"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -129,36 +148,56 @@ export default function RegisterPage() {
 
           <input
             type="date"
-            className="border p-2 rounded"
+            className="
+              border-b border-gray-400
+              focus:outline-none
+              p-2
+            "
             value={date}
             onChange={(e) => setDate(e.target.value)}
           />
 
-          <div className="flex gap-2">
+          <div className="flex gap-4">
             <input
               type="time"
-              className="border p-2 rounded w-1/2"
+              className="
+                border-b border-gray-400
+                focus:outline-none
+                p-2 w-1/2
+              "
               value={startTime}
               onChange={(e) => setStartTime(e.target.value)}
             />
 
             <input
               type="time"
-              className="border p-2 rounded w-1/2"
+              className="
+                border-b border-gray-400
+                focus:outline-none
+                p-2 w-1/2
+              "
               value={endTime}
               onChange={(e) => setEndTime(e.target.value)}
             />
           </div>
 
           <textarea
-            className="border p-2 rounded"
+            className="
+              border-b border-gray-400
+              focus:outline-none
+              p-2
+            "
             placeholder="理由"
             value={reason}
             onChange={(e) => setReason(e.target.value)}
           />
 
           <select
-            className="border p-2 rounded cursor-pointer"
+            className="
+              border-b border-gray-400
+              focus:outline-none
+              p-2 cursor-pointer
+            "
             value={project}
             onChange={(e) => setProject(e.target.value)}
           >
@@ -169,26 +208,34 @@ export default function RegisterPage() {
             ))}
           </select>
 
-          {/* ★ 登録ボタン（初期色 #c3d60b → ホバーで濃く） */}
+          {/* ★ 登録ボタン（ホバーで白反転） */}
           <button
-            className="text-white font-bold p-2 rounded cursor-pointer bg-[#c3d60b] hover:bg-[#a8c00a] transition"
+            className="
+              rounded-full font-medium p-2 cursor-pointer
+              bg-[#c3d60b] text-white border border-transparent
+              hover:bg-white hover:text-[#c3d60b] hover:border-[#c3d60b]
+              transition
+            "
             onClick={() => setShowConfirm(true)}
           >
             登録
           </button>
 
-          {/* ★ 一覧へ戻る（黒 → ホバーでグレー） */}
+          {/* ★ 戻るボタン（黒 → 白反転） */}
           <button
-            className="text-white font-bold p-2 rounded cursor-pointer bg-black hover:bg-gray-700 transition"
+            className="
+              rounded-full font-medium p-2 cursor-pointer
+              bg-black text-white border border-transparent
+              hover:bg-white hover:text-black hover:border-black
+              transition
+            "
             onClick={() => router.push("/")}
           >
             一覧へ戻る
           </button>
 
         </div>
-
       </div>
-
     </div>
   )
 }

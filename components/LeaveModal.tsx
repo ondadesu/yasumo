@@ -34,7 +34,7 @@ export default function LeaveModal({ leave, onClose, onUpdate, onDelete }: Props
 
   const [projects, setProjects] = useState<{ id: string; name: string }[]>([])
 
-  // ★ モーダル表示中は背景スクロール禁止
+  // 背景スクロール禁止
   useEffect(() => {
     document.body.style.overflow = "hidden"
     return () => {
@@ -42,28 +42,24 @@ export default function LeaveModal({ leave, onClose, onUpdate, onDelete }: Props
     }
   }, [])
 
-  // ★ 案件一覧を Supabase から取得
+  // 案件一覧取得
   useEffect(() => {
     const load = async () => {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from("projects")
         .select("id, name")
         .order("created_at", { ascending: true })
 
-      if (!error && data) {
+      if (data) {
         setProjects(data)
-
-        // 現在の leave.project が DB に存在しない場合は先頭をセット
         if (!data.some((p) => p.name === project)) {
           if (data.length > 0) setProject(data[0].name)
         }
       }
     }
-
     load()
   }, [])
 
-  // ★ 更新処理
   const handleUpdate = () => {
     const updatedLeave = {
       ...leave,
@@ -78,7 +74,6 @@ export default function LeaveModal({ leave, onClose, onUpdate, onDelete }: Props
     onClose()
   }
 
-  // ★ 削除前に確認アラートを出す
   const handleDeleteClick = () => {
     const ok = window.confirm("本当に削除しますか？")
     if (!ok) return
@@ -87,23 +82,37 @@ export default function LeaveModal({ leave, onClose, onUpdate, onDelete }: Props
 
   return (
     <div
-      className="fixed inset-0 bg-black/40 flex items-center justify-center"
-      onClick={onClose}   // ← 背景クリックで閉じる
+      className="fixed inset-0 bg-black/40 flex items-center justify-center p-4"
+      onClick={onClose}
     >
       <div
-        className="bg-white rounded-xl p-6 w-96 space-y-4"
-        onClick={(e) => e.stopPropagation()}  // ← モーダル内クリックは閉じない
+        className="
+          bg-white rounded-xl p-6 space-y-4
+          w-11/12 max-w-md
+          shadow-lg
+        "
+        onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-lg font-bold">有給更新</h2>
 
+        {/* 下線のみの入力欄 */}
         <input
-          className="border p-2 rounded w-full"
+          className="
+            w-full p-2
+            border-b border-gray-400
+            focus:outline-none
+          "
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
 
         <select
-          className="border p-2 rounded w-full"
+          className="
+            w-full p-2
+            border-b border-gray-400
+            focus:outline-none
+            cursor-pointer
+          "
           value={project}
           onChange={(e) => setProject(e.target.value)}
         >
@@ -116,52 +125,86 @@ export default function LeaveModal({ leave, onClose, onUpdate, onDelete }: Props
 
         <input
           type="date"
-          className="border p-2 rounded w-full"
+          className="
+            w-full p-2
+            border-b border-gray-400
+            focus:outline-none
+          "
           value={day}
           onChange={(e) => setDay(e.target.value)}
         />
 
-        <div className="flex gap-2">
+        <div className="flex gap-4">
           <input
             type="time"
-            className="border p-2 rounded w-full"
+            className="
+              w-1/2 p-2
+              border-b border-gray-400
+              focus:outline-none
+            "
             value={start}
             onChange={(e) => setStart(e.target.value)}
           />
 
           <input
             type="time"
-            className="border p-2 rounded w-full"
+            className="
+              w-1/2 p-2
+              border-b border-gray-400
+              focus:outline-none
+            "
             value={end}
             onChange={(e) => setEnd(e.target.value)}
           />
         </div>
 
         <textarea
-          className="border p-2 rounded w-full"
+          className="
+            w-full p-2
+            border-b border-gray-400
+            focus:outline-none
+          "
           value={reason}
           onChange={(e) => setReason(e.target.value)}
         />
 
+        {/* ボタン群 */}
         <div className="flex gap-2">
 
+          {/* 更新（黄緑 → 白反転） */}
           <button
-            className="flex-1 text-white py-2 rounded"
-            style={{ background: "#c3d60b" }}
+            className="
+              flex-1 py-2 rounded-full font-medium cursor-pointer
+              bg-[#c3d60b] text-white border border-transparent
+              hover:bg-white hover:text-[#c3d60b] hover:border-[#c3d60b]
+              transition
+            "
             onClick={handleUpdate}
           >
             更新
           </button>
 
+          {/* 削除（白 × 赤 → 赤反転） */}
           <button
-            className="flex-1 bg-red-500 text-white py-2 rounded"
-            onClick={handleDeleteClick}   // ← 確認アラート付き削除
+            className="
+              flex-1 py-2 rounded-full font-medium cursor-pointer
+              bg-white text-red-500 border border-red-500
+              hover:bg-red-500 hover:text-white hover:border-white
+              transition
+            "
+            onClick={handleDeleteClick}
           >
             削除
           </button>
 
+          {/* 閉じる（白 × 黒 → 黒反転） */}
           <button
-            className="flex-1 bg-gray-300 py-2 rounded"
+            className="
+              flex-1 py-2 rounded-full font-medium cursor-pointer
+              bg-white text-black border border-black
+              hover:bg-black hover:text-white hover:border-white
+              transition
+            "
             onClick={onClose}
           >
             閉じる
