@@ -85,11 +85,25 @@ export default function LeaveModal({ leave, onClose, onUpdate, onDelete }: Props
       className="fixed inset-0 bg-black/40 flex items-center justify-center p-4"
       onClick={onClose}
     >
+      <style>{`
+      .fade-up {
+      opacity: 0;
+      transform: translateY(40px);
+      animation: fadeUp 0.8s ease-out forwards;
+      }
+
+      @keyframes fadeUp {
+      to {
+      opacity: 1;
+      transform: translateY(0);
+      }
+      }
+      `}</style>
       <div
         className="
           bg-white rounded-xl p-6 space-y-4
           w-11/12 max-w-md
-          shadow-lg
+          shadow-lg fade-up
         "
         onClick={(e) => e.stopPropagation()}
       >

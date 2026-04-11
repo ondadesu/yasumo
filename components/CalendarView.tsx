@@ -277,7 +277,7 @@ export default function CalendarView() {
                   </span>
                 </p>
 
-                <div className="grid grid-cols-2 md:grid-cols-7 gap-3">
+                <div className="grid md:grid-cols-7 gap-3">
                   {weekdays.map((w, i) => {
                     const dayDate = new Date(weekStart)
                     dayDate.setDate(dayDate.getDate() + i + 1)
