@@ -82,7 +82,7 @@ export default function LeaveModal({ leave, onClose, onUpdate, onDelete }: Props
 
   return (
     <div
-      className="fixed inset-0 bg-black/40 flex items-center justify-center p-4"
+      className="z-60 fixed inset-0 bg-black/40 flex items-center justify-center p-4"
       onClick={onClose}
     >
       <style>{`
