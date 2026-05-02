@@ -111,11 +111,11 @@ export default function RegisterPage() {
             ))}
           </select>
 
-          <button className="rounded-full font-medium p-2 cursor-pointer bg-[#c3d60b] text-white border border-transparent hover:bg-white hover:text-[#c3d60b] hover:border-[#c3d60b] transition" onClick={() => setShowConfirm(true)}>
+          <button className="rounded-full font-semibold p-2 cursor-pointer bg-[#c3d60b] text-white border border-transparent hover:bg-white hover:text-[#c3d60b] hover:border-[#c3d60b] transition" onClick={() => setShowConfirm(true)}>
             登録
           </button>
 
-          <button className="rounded-full font-medium p-2 cursor-pointer bg-black text-white border border-transparent hover:bg-white hover:text-black hover:border-black transition" onClick={() => router.push("/")}>
+          <button className="rounded-full font-semibold p-2 cursor-pointer bg-black text-white border border-transparent hover:bg-white hover:text-black hover:border-black transition" onClick={() => router.push("/")}>
             一覧へ戻る
           </button>
         </div>
