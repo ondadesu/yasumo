@@ -52,7 +52,7 @@ function LeaveCard({ l, onClick }: { l: Leave; onClick: () => void }) {
         transition-all duration-150 relative overflow-hidden
       "
     >
-      <span className="absolute inset-0 bg-[#c3d60b] opacity-0 group-hover:opacity-[0.03] transition-opacity duration-150" />
+      <span className="absolute inset-0 opacity-0 transition-opacity duration-150" />
       <span className="block text-[8px] font-black text-[#8fa008] bg-[#f4f9cc] px-1.5 py-0.5 rounded-[3px] mb-1.5 tracking-[0.04em] w-fit leading-[1.5]">
         {l.project}
       </span>
@@ -273,7 +273,7 @@ export default function CalendarView() {
                   <div key={week} className="bg-white border border-[#ebebea] rounded-2xl overflow-hidden shadow-md">
 
                     {/* 週ヘッダー */}
-                    <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 bg-[#fcfcfa] border-b border-[#f0f0ee]">
+                    <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 border-b border-[#f0f0ee]">
                       <span className="text-[10px] font-bold text-[#c8c8c0] tracking-[0.05em]">{weekRange}</span>
                       <div className="flex flex-wrap items-center gap-1.5">
                         <span className="text-[10px] text-[#d8d8d0] mr-0.5">今週休むメンバー</span>
@@ -289,14 +289,14 @@ export default function CalendarView() {
                     {/* PC: 7列グリッド */}
                     <div className="hidden md:block">
                       {/* 曜日ヘッダー行 */}
-                      <div className="grid grid-cols-7 border-b border-[#f4f4f2] bg-[#fafaf8]">
+                      <div className="grid grid-cols-7 border-b border-[#f4f4f2]">
                         {weekdays.map((w, i) => {
                           const dayDate = new Date(weekStart); dayDate.setDate(dayDate.getDate() + i)
                           const today   = isToday(dayDate)
                           const weekend = i === 0 || i === 6
                           const hasCard = dayMap[i] && dayMap[i].length > 0
                           return (
-                            <div key={i} className={`flex flex-col items-center py-2 border-r border-[#f4f4f2] last:border-r-0 gap-1 ${weekend ? "bg-[#f5f5f3]" : ""}`}>
+                            <div key={i} className={`flex flex-col items-center py-2 border-r border-[#f4f4f2] last:border-r-0 gap-1 ${weekend ? "" : ""}`}>
                               <span className={`text-[9px] font-black tracking-[0.08em] ${i === 0 ? "text-[#fca5a5]" : i === 6 ? "text-[#93c5fd]" : "text-[#d0d0c8]"}`}>{w}</span>
                               <span className={`text-[12px] font-black w-[22px] h-[22px] rounded-full flex items-center justify-center leading-none ${today ? "bg-[#c3d60b] text-white" : i === 0 ? "text-[#f87171]" : i === 6 ? "text-[#60a5fa]" : weekend ? "text-[#c8c8c0]" : "text-[#333]"}`}>
                                 {dayDate.getDate()}
