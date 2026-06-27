@@ -20,7 +20,6 @@ type Props = {
 }
 
 export default function LeaveModal({ leave, onClose, onUpdate, onDelete }: Props) {
-
   const date = leave.start.split("T")[0]
   const startTime = leave.start.split("T")[1]
   const endTime = leave.end.split("T")[1]
@@ -34,7 +33,6 @@ export default function LeaveModal({ leave, onClose, onUpdate, onDelete }: Props
 
   const [projects, setProjects] = useState<{ id: string; name: string }[]>([])
 
-  // 背景スクロール禁止
   useEffect(() => {
     document.body.style.overflow = "hidden"
     return () => {
@@ -42,7 +40,6 @@ export default function LeaveModal({ leave, onClose, onUpdate, onDelete }: Props
     }
   }, [])
 
-  // 案件一覧取得
   useEffect(() => {
     const load = async () => {
       const { data } = await supabase
@@ -82,126 +79,125 @@ export default function LeaveModal({ leave, onClose, onUpdate, onDelete }: Props
 
   return (
     <div
-      className="z-60 fixed inset-0 bg-black/40 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
       onClick={onClose}
     >
       <style>{`
-      .fade-up {
-      opacity: 0;
-      transform: translateY(40px);
-      animation: fadeUp 0.8s ease-out forwards;
-      }
-
-      @keyframes fadeUp {
-      to {
-      opacity: 1;
-      transform: translateY(0);
-      }
-      }
+        .fade-up {
+          opacity: 0;
+          transform: translateY(40px);
+          animation: fadeUp 0.4s ease-out forwards;
+        }
+        @keyframes fadeUp {
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
       `}</style>
-      <div
-        className="
-          bg-white rounded-xl p-6 space-y-4
-          w-11/12 max-w-md
-          shadow-lg fade-up
-        "
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h2 className="text-lg font-bold">有給更新</h2>
 
-        {/* 下線のみの入力欄 */}
-        <input
+        <div
           className="
-            w-full p-2
-            border-b border-gray-400
-            focus:outline-none
+            bg-white rounded-2xl 
+            w-full max-w-lg 
+            p-4 md:p-6 
+            space-y-6 
+            shadow-xl fade-up
+            max-h-[90vh] overflow-y-auto
           "
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-
-        <select
-          className="
-            w-full p-2
-            border-b border-gray-400
-            focus:outline-none
-            cursor-pointer
-          "
-          value={project}
-          onChange={(e) => setProject(e.target.value)}
+          onClick={(e) => e.stopPropagation()}
         >
-          {projects.map((p) => (
-            <option key={p.id} value={p.name}>
-              {p.name}
-            </option>
-          ))}
-        </select>
 
-        <input
-          type="date"
-          className="
-            w-full p-2
-            border-b border-gray-400
-            focus:outline-none
-          "
-          value={day}
-          onChange={(e) => setDay(e.target.value)}
-        />
+        <h2 className="text-lg md:text-xl font-bold text-gray-800">有給の編集</h2>
 
-        <div className="flex gap-4">
-          <input
-            type="time"
-            className="
-              w-1/2 p-2
-              border-b border-gray-400
-              focus:outline-none
-            "
-            value={start}
-            onChange={(e) => setStart(e.target.value)}
-          />
+        {/* 入力フィールド */}
+        <div className="space-y-4">
 
-          <input
-            type="time"
-            className="
-              w-1/2 p-2
-              border-b border-gray-400
-              focus:outline-none
-            "
-            value={end}
-            onChange={(e) => setEnd(e.target.value)}
-          />
+          <div className="bg-gray-50 p-3 rounded-xl border border-gray-200">
+            <label className="text-xs text-gray-500">名前</label>
+            <input
+              className="w-full bg-transparent mt-1 text-gray-800 focus:outline-none"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
+
+          <div className="bg-gray-50 p-3 rounded-xl border border-gray-200">
+            <label className="text-xs text-gray-500">案件</label>
+            <select
+              className="w-full bg-transparent mt-1 text-gray-800 focus:outline-none cursor-pointer"
+              value={project}
+              onChange={(e) => setProject(e.target.value)}
+            >
+              {projects.map((p) => (
+                <option key={p.id} value={p.name}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="bg-gray-50 p-3 rounded-xl border border-gray-200">
+            <label className="text-xs text-gray-500">日付</label>
+            <input
+              type="date"
+              className="w-full bg-transparent mt-1 text-gray-800 focus:outline-none"
+              value={day}
+              onChange={(e) => setDay(e.target.value)}
+            />
+          </div>
+
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="bg-gray-50 p-3 rounded-xl border border-gray-200 flex-1">
+              <label className="text-xs text-gray-500">開始</label>
+              <input
+                type="time"
+                className="w-full bg-transparent mt-1 text-gray-800 focus:outline-none"
+                value={start}
+                onChange={(e) => setStart(e.target.value)}
+              />
+            </div>
+
+            <div className="bg-gray-50 p-3 rounded-xl border border-gray-200 flex-1">
+              <label className="text-xs text-gray-500">終了</label>
+              <input
+                type="time"
+                className="w-full bg-transparent mt-1 text-gray-800 focus:outline-none"
+                value={end}
+                onChange={(e) => setEnd(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="bg-gray-50 p-3 rounded-xl border border-gray-200">
+            <label className="text-xs text-gray-500">理由</label>
+            <textarea
+              className="w-full bg-transparent mt-1 text-gray-800 focus:outline-none resize-none"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+            />
+          </div>
         </div>
 
-        <textarea
-          className="
-            w-full p-2
-            border-b border-gray-400
-            focus:outline-none
-          "
-          value={reason}
-          onChange={(e) => setReason(e.target.value)}
-        />
-
         {/* ボタン群 */}
-        <div className="flex gap-2">
+        <div className="flex flex-col md:flex-row gap-3">
 
-          {/* 更新（黄緑 → 白反転） */}
           <button
             className="
-              flex-1 py-2 rounded-full font-medium cursor-pointer
-              bg-[#c3d60b] text-white border border-transparent
+              flex-1 py-3 rounded-full font-semibold
+              bg-[#c3d60b] text-white
               hover:bg-white hover:text-[#c3d60b] hover:border-[#c3d60b]
+              border border-transparent hover:border-[#c3d60b]
               transition
             "
             onClick={handleUpdate}
           >
-            更新
+            更新する
           </button>
 
-          {/* 削除（白 × 赤 → 赤反転） */}
           <button
             className="
-              flex-1 py-2 rounded-full font-medium cursor-pointer
+              flex-1 py-3 rounded-full font-semibold
               bg-white text-red-500 border border-red-500
               hover:bg-red-500 hover:text-white hover:border-white
               transition
@@ -211,12 +207,11 @@ export default function LeaveModal({ leave, onClose, onUpdate, onDelete }: Props
             削除
           </button>
 
-          {/* 閉じる（白 × 黒 → 黒反転） */}
           <button
             className="
-              flex-1 py-2 rounded-full font-medium cursor-pointer
-              bg-white text-black border border-black
-              hover:bg-black hover:text-white hover:border-white
+              flex-1 py-3 rounded-full font-semibold
+              bg-white text-gray-700 border border-gray-400
+              hover:bg-gray-800 hover:text-white hover:border-gray-800
               transition
             "
             onClick={onClose}
@@ -225,7 +220,6 @@ export default function LeaveModal({ leave, onClose, onUpdate, onDelete }: Props
           </button>
 
         </div>
-
       </div>
     </div>
   )

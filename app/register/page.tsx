@@ -12,18 +12,17 @@ export default function RegisterPage() {
   const [startTime, setStartTime] = useState("")
   const [endTime, setEndTime] = useState("")
   const [reason, setReason] = useState("")
-
   const [projects, setProjects] = useState<{ id: string; name: string }[]>([])
   const [project, setProject] = useState("")
-
   const [showConfirm, setShowConfirm] = useState(false)
 
   useEffect(() => {
     const load = async () => {
       const { data } = await supabase
-      .from("projects")
-      .select("*")
-      .order("created_at", { ascending: true })
+        .from("projects")
+        .select("*")
+        .order("created_at", { ascending: true })
+
       if (data) {
         setProjects(data)
         if (data.length > 0) setProject(data[0].name)
@@ -42,8 +41,8 @@ export default function RegisterPage() {
     const end = `${date}T${endTime}:00`
 
     const { error } = await supabase
-    .from("leaves")
-    .insert([{ name, project, start, end, reason }])
+      .from("leaves")
+      .insert([{ name, project, start, end, reason }])
 
     if (error) {
       alert("保存失敗")
@@ -54,22 +53,30 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white md:bg-gray-50">
-      <style>{`
-        .fade-up { opacity: 0; transform: translateY(40px); animation: fadeUp 0.8s ease-out forwards; }
-        @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
-      `}</style>
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
 
-      {/* ★ 確認モーダル（最前面） */}
+      {/* モーダル */}
       {showConfirm && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-40" onClick={() => setShowConfirm(false)}>
-          <div className="bg-white p-6 rounded-xl w-80 space-y-4 z-50" onClick={(e) => e.stopPropagation()}>
-            <h2 className="text-lg font-bold text-center">登録内容確認</h2>
-            <p className="text-sm text-gray-700 text-center">この内容で登録しますか？</p>
+        <div
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+          onClick={() => setShowConfirm(false)}
+        >
+          <div
+            className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl space-y-4 fade-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-lg font-bold text-center text-gray-800">登録内容確認</h2>
+            <p className="text-sm text-gray-600 text-center">この内容で登録しますか？</p>
 
             <div className="flex gap-3">
               <button
-                className="flex-1 py-2 rounded-full cursor-pointer font-medium bg-[#c3d60b] text-white border border-transparent hover:bg-white hover:text-[#c3d60b] hover:border-[#c3d60b] transition shadow-sm"
+                className="
+                  flex-1 py-2 rounded-full font-medium
+                  bg-[#c3d60b] text-white
+                  hover:bg-white hover:text-[#c3d60b] hover:border-[#c3d60b]
+                  border border-transparent hover:border-[#c3d60b]
+                  transition
+                "
                 onClick={() => {
                   setShowConfirm(false)
                   submitLeave()
@@ -79,7 +86,12 @@ export default function RegisterPage() {
               </button>
 
               <button
-                className="flex-1 py-2 rounded-full cursor-pointer font-medium bg-white text-black border border-black hover:bg-black hover:text-white hover:border-white transition shadow-sm"
+                className="
+                  flex-1 py-2 rounded-full font-medium
+                  bg-white text-gray-700 border border-gray-300
+                  hover:bg-gray-800 hover:text-white hover:border-gray-800
+                  transition
+                "
                 onClick={() => setShowConfirm(false)}
               >
                 いいえ
@@ -89,35 +101,120 @@ export default function RegisterPage() {
         </div>
       )}
 
-      {/* ★ 有給登録カード（モーダルより後ろ） */}
-      <div className="bg-white p-8 rounded-xl w-96 shadow-none md:shadow-[0_2px_8px_rgba(0,0,0,0.12)] fade-up z-10">
-        <h1 className="text-xl font-bold mb-6 text-center">有給登録</h1>
+      {/* 本体カード */}
+      <div className="
+        bg-white w-full max-w-lg p-6 md:p-8 rounded-2xl shadow-md space-y-8 fade-up
+      ">
+        <div className="space-y-2 text-center mb-4">
+          <h1 className="text-2xl font-bold text-gray-800">有給登録</h1>
+          <p className="text-gray-500 text-sm leading-relaxed">
+            チームの有給状況を正確に管理するため、必要な情報を入力してください。
+            入力内容は後から編集することもできます。
+          </p>
+        </div>
 
-        <div className="flex flex-col gap-6">
-          <input className="border-b border-gray-400 focus:outline-none p-2" placeholder="名前" value={name} onChange={(e) => setName(e.target.value)} />
+        {/* 入力フォーム */}
+        <div className="space-y-5">
 
-          <input type="date" className="border-b border-gray-400 focus:outline-none p-2" value={date} onChange={(e) => setDate(e.target.value)} />
-
-          <div className="flex gap-4">
-            <input type="time" className="border-b border-gray-400 focus:outline-none p-2 w-1/2" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
-            <input type="time" className="border-b border-gray-400 focus:outline-none p-2 w-1/2" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
+          {/* 名前 */}
+          <div className="bg-gray-50 p-3 rounded-xl border border-gray-200 mb-3">
+            <label className="text-xs text-gray-500">名前</label>
+            <input
+              className="w-full bg-transparent mt-1 text-gray-800 focus:outline-none"
+              placeholder="例：佐藤"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
           </div>
 
-          <textarea className="border-b border-gray-400 focus:outline-none p-2" placeholder="理由" value={reason} onChange={(e) => setReason(e.target.value)} />
+          {/* 日付 */}
+          <div className="bg-gray-50 p-3 rounded-xl border border-gray-200 mb-3">
+            <label className="text-xs text-gray-500">日付</label>
+            <input
+              type="date"
+              className="w-full bg-transparent mt-1 text-gray-800 focus:outline-none"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+            />
+          </div>
 
-          <select className="border-b border-gray-400 focus:outline-none p-2 cursor-pointer" value={project} onChange={(e) => setProject(e.target.value)}>
-            {projects.map((p) => (
-              <option key={p.id} value={p.name}>{p.name}</option>
-            ))}
-          </select>
+          {/* 時間 */}
+          <div className="flex flex-col md:flex-row md:gap-4 mb-3">
+            <div className="bg-gray-50 p-3 rounded-xl border border-gray-200 mb-3 flex-1">
+              <label className="text-xs text-gray-500">開始時間</label>
+              <input
+                type="time"
+                className="w-full bg-transparent mt-1 text-gray-800 focus:outline-none"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+              />
+            </div>
 
-          <button className="rounded-full font-semibold p-2 cursor-pointer bg-[#c3d60b] text-white border border-transparent hover:bg-white hover:text-[#c3d60b] hover:border-[#c3d60b] transition" onClick={() => setShowConfirm(true)}>
-            登録
+            <div className="bg-gray-50 p-3 rounded-xl border border-gray-200 mb-3 flex-1">
+              <label className="text-xs text-gray-500">終了時間</label>
+              <input
+                type="time"
+                className="w-full bg-transparent mt-1 text-gray-800 focus:outline-none"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* 理由 */}
+          <div className="bg-gray-50 p-3 rounded-xl border border-gray-200 mb-3">
+            <label className="text-xs text-gray-500">理由</label>
+            <textarea
+              className="w-full bg-transparent mt-1 text-gray-800 focus:outline-none resize-none"
+              placeholder="例：私用 / 通院 / 家庭の事情"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+            />
+          </div>
+
+          {/* 案件 */}
+          <div className="bg-gray-50 p-3 rounded-xl border border-gray-200 mb-3">
+            <label className="text-xs text-gray-500">案件</label>
+            <select
+              className="w-full bg-transparent mt-1 text-gray-800 focus:outline-none cursor-pointer"
+              value={project}
+              onChange={(e) => setProject(e.target.value)}
+            >
+              {projects.map((p) => (
+                <option key={p.id} value={p.name}>{p.name}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* ボタン群 */}
+        <div className="flex flex-col md:flex-row gap-3">
+
+          <button
+            className="
+              flex-1 py-3 rounded-full font-semibold
+              bg-[#c3d60b] text-white
+              hover:bg-white hover:text-[#c3d60b] hover:border-[#c3d60b]
+              border border-transparent hover:border-[#c3d60b]
+              transition
+            "
+            onClick={() => setShowConfirm(true)}
+          >
+            登録する
           </button>
 
-          <button className="rounded-full font-semibold p-2 cursor-pointer bg-black text-white border border-transparent hover:bg-white hover:text-black hover:border-black transition" onClick={() => router.push("/")}>
+          <button
+            className="
+              flex-1 py-3 rounded-full font-semibold
+              bg-white text-gray-700 border border-gray-400
+              hover:bg-gray-800 hover:text-white hover:border-gray-800
+              transition
+            "
+            onClick={() => router.push("/")}
+          >
             一覧へ戻る
           </button>
+
         </div>
       </div>
     </div>
