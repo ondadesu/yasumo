@@ -62,7 +62,7 @@ function LeaveCard({ l, onClick }: { l: Leave; onClick: () => void }) {
       </span>
       <span className="flex items-center gap-1 mb-1">
         <ClockIcon className="w-2.5 h-2.5 text-[#d0d0c8] shrink-0" />
-        <span className="text-[9px] text-[#b8b8b0] leading-none">{formatTime(l.start)}〜{formatTime(l.end)}</span>
+        <span className="text-[9px] text-[#b8b8b0] leading-none">{formatTime(l.start)}〜{formatTime(l.end)} 不在</span>
       </span>
       {l.reason && (
         <span className="flex items-start gap-1">
